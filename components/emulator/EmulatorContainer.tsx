@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import GameBoyShell from "./GameBoyShell";
@@ -52,18 +52,8 @@ export default function EmulatorContainer() {
   const [isError, setIsError] = useState(false);
   const [pressed, setPressed] = useState<Set<string>>(new Set());
   const [tapToPlay, setTapToPlay] = useState(true);
-  const tapToPlayRef = useRef(true);
 
   useEffect(() => { setIsMobile(isMobileDevice()); }, []);
-
-  // Unlock audio and dismiss click-to-resume overlay on first interaction
-  const startEmulator = useCallback(() => {
-    if (!tapToPlayRef.current) return;
-    tapToPlayRef.current = false;
-    setTapToPlay(false);
-    // Clicking the player div within a trusted event callback chain unlocks AudioContext
-    document.getElementById("ejs-player")?.click();
-  }, []);
 
   const fireButton = useCallback((btn: string, down: boolean) => {
     const val = down ? 1 : 0;
@@ -80,14 +70,13 @@ export default function EmulatorContainer() {
 
   // Touch/on-screen button press
   const handleButton = useCallback((btn: string, isDown: boolean) => {
-    if (isDown) startEmulator();
     fireButton(btn, isDown);
     setPressed((prev) => {
       const next = new Set(prev);
       isDown ? next.add(btn) : next.delete(btn);
       return next;
     });
-  }, [fireButton, startEmulator]);
+  }, [fireButton]);
 
   // Physical keyboard → fire simulateInput + visual highlight
   useEffect(() => {
@@ -95,7 +84,6 @@ export default function EmulatorContainer() {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
       const btn = KEY_TO_BTN[e.key];
       if (!btn || e.repeat) return;
-      startEmulator();
       fireButton(btn, true);
       setPressed((prev) => new Set(prev).add(btn));
     };
@@ -137,12 +125,11 @@ export default function EmulatorContainer() {
           }}
         >
           <div className="relative w-full" style={{ aspectRatio: "10/9" }}>
-            <EmulatorCanvas onReady={() => {}} onError={() => setIsError(true)} />
+            <EmulatorCanvas onReady={() => setTapToPlay(false)} onError={() => setIsError(true)} />
             {tapToPlay && (
               <div
-                className="absolute inset-0 z-30 flex items-center justify-center cursor-pointer select-none"
-                style={{ background: "rgba(5,5,8,0.82)" }}
-                onClick={startEmulator}
+                className="absolute inset-0 z-30 flex items-center justify-center select-none"
+                style={{ background: "rgba(5,5,8,0.82)", pointerEvents: "none" }}
               >
                 <span className="font-pixel text-[10px] text-tc-pink animate-pulse tracking-widest">TAP TO PLAY</span>
               </div>
@@ -193,12 +180,11 @@ export default function EmulatorContainer() {
       >
         <GameBoyShell onButton={handleButton} pressedButtons={pressed} isPlaying>
           <div className="relative w-full h-full">
-            <EmulatorCanvas onReady={() => {}} onError={() => setIsError(true)} />
+            <EmulatorCanvas onReady={() => setTapToPlay(false)} onError={() => setIsError(true)} />
             {tapToPlay && (
               <div
-                className="absolute inset-0 z-30 flex items-center justify-center cursor-pointer select-none"
-                style={{ background: "rgba(5,5,8,0.82)" }}
-                onClick={startEmulator}
+                className="absolute inset-0 z-30 flex items-center justify-center select-none"
+                style={{ background: "rgba(5,5,8,0.82)", pointerEvents: "none" }}
               >
                 <span className="font-pixel text-[7px] text-tc-pink animate-pulse tracking-widest">TAP TO PLAY</span>
               </div>
