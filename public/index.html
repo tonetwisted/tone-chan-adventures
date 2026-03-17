@@ -233,8 +233,9 @@
   <script>
     var EJS_player        = "#game";
     var EJS_core          = "gambatte";          // Game Boy Color core
-    var EJS_gameUrl       = "roms/tone-chan-demo.gbc";
-    var EJS_pathtodata    = "emulatorjs/data/";  // self-hosted EmulatorJS
+    // Absolute URL required — CDN iframe resolves relative paths against cdn.emulatorjs.org
+    var EJS_gameUrl       = window.location.origin + "/roms/tone-chan-demo.gbc";
+    var EJS_pathtodata    = "https://cdn.emulatorjs.org/stable/data/";  // CDN
     var EJS_startOnLoaded = true;
     var EJS_VirtualGamepad = false;              // disable built-in overlay
     var EJS_mobileControls = false;              // legacy alias
@@ -305,6 +306,6 @@
   </script>
 
   <!-- ── EmulatorJS loader — must be LAST ───────────────────────────── -->
-  <script src="emulatorjs/data/loader.js"></script>
+  <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
 </body>
 </html>
