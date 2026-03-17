@@ -1,0 +1,25 @@
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Apply COOP/COEP to all routes — required for EmulatorJS SharedArrayBuffer.
+# credentialless (vs require-corp) lets CDN resources load without needing
+# their own Cross-Origin-Resource-Policy header.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy   = "same-origin"
+    Cross-Origin-Embedder-Policy = "credentialless"
+
+# Allow the EmulatorJS CDN to fetch the ROM cross-origin
+[[headers]]
+  for = "/roms/*"
+  [headers.values]
+    Access-Control-Allow-Origin    = "*"
+    Cross-Origin-Resource-Policy   = "cross-origin"
+
+# Same for the standalone index.html
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cross-Origin-Opener-Policy   = "same-origin"
+    Cross-Origin-Embedder-Policy = "credentialless"
