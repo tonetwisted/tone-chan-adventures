@@ -36,7 +36,7 @@ const KEY_TO_BUTTON: Record<string, string> = {
 };
 
 export default function EmulatorContainer() {
-  const [state, setState] = useState<State>("idle");
+  const [state, setState] = useState<State>("playing");
   const [hasWasm] = useState(() => typeof window !== "undefined" ? supportsWasm() : true);
   const [isMobile, setIsMobile] = useState(false);
   const [pressed, setPressed] = useState<Set<string>>(new Set());
