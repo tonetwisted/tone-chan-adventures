@@ -51,20 +51,32 @@ export default function EmulatorContainer() {
   const [isMobile, setIsMobile] = useState(false);
   const [isError, setIsError] = useState(false);
   const [pressed, setPressed] = useState<Set<string>>(new Set());
-  const [tapToPlay, setTapToPlay] = useState(true);
 
   useEffect(() => { setIsMobile(isMobileDevice()); }, []);
 
   const fireButton = useCallback((btn: string, down: boolean) => {
     const val = down ? 1 : 0;
     const idx = BTN_TO_INDEX[btn];
+    const type = down ? "keydown" : "keyup";
 
-    // Correct path: EJS_emulator.gameManager.simulateInput(player, button, value)
+    // Method 1: simulateInput API (works when emulator core is running)
     const w = window as unknown as Record<string, unknown>;
     const gm = (w.EJS_emulator as { gameManager?: { simulateInput?: (p: number, b: number, v: number) => void } } | undefined)?.gameManager;
-
     if (idx !== undefined && gm?.simulateInput) {
       gm.simulateInput(0, idx, val);
+    }
+
+    // Method 2: keyboard event fallback — same as standalone index.html
+    const key = BTN_TO_KEY[btn];
+    if (key) {
+      const opts = { key, bubbles: true, cancelable: true };
+      document.dispatchEvent(new KeyboardEvent(type, opts));
+      document.querySelectorAll("iframe").forEach((f) => {
+        try {
+          const doc = (f as HTMLIFrameElement).contentDocument;
+          if (doc) doc.dispatchEvent(new KeyboardEvent(type, opts));
+        } catch { /* cross-origin, skip */ }
+      });
     }
   }, []);
 
@@ -125,15 +137,7 @@ export default function EmulatorContainer() {
           }}
         >
           <div className="relative w-full" style={{ aspectRatio: "10/9" }}>
-            <EmulatorCanvas onReady={() => setTapToPlay(false)} onError={() => setIsError(true)} />
-            {tapToPlay && (
-              <div
-                className="absolute inset-0 z-30 flex items-center justify-center select-none"
-                style={{ background: "rgba(5,5,8,0.82)", pointerEvents: "none" }}
-              >
-                <span className="font-pixel text-[10px] text-tc-pink animate-pulse tracking-widest">TAP TO PLAY</span>
-              </div>
-            )}
+            <EmulatorCanvas onReady={() => {}} onError={() => setIsError(true)} />
           </div>
         </div>
 
@@ -179,17 +183,7 @@ export default function EmulatorContainer() {
         style={{ height: "clamp(480px, 85dvh, 720px)", maxWidth: "clamp(300px, 96vw, 440px)" }}
       >
         <GameBoyShell onButton={handleButton} pressedButtons={pressed} isPlaying>
-          <div className="relative w-full h-full">
-            <EmulatorCanvas onReady={() => setTapToPlay(false)} onError={() => setIsError(true)} />
-            {tapToPlay && (
-              <div
-                className="absolute inset-0 z-30 flex items-center justify-center select-none"
-                style={{ background: "rgba(5,5,8,0.82)", pointerEvents: "none" }}
-              >
-                <span className="font-pixel text-[7px] text-tc-pink animate-pulse tracking-widest">TAP TO PLAY</span>
-              </div>
-            )}
-          </div>
+          <EmulatorCanvas onReady={() => {}} onError={() => setIsError(true)} />
         </GameBoyShell>
         <div
           className="absolute -inset-4 -z-10 blur-3xl opacity-30 rounded-full pointer-events-none"
