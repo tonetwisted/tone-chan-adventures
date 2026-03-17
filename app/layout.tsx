@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import Nav from "@/components/layout/Nav";
-import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tonechanadventures.com";
@@ -69,9 +67,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-tc-black text-tc-cream antialiased">
-        <Nav />
-        <main>{children}</main>
-        <Footer />
+        {children}
         <Analytics />
       </body>
     </html>
