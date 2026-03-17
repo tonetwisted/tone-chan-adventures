@@ -31,6 +31,34 @@ export default function EmulatorCanvas({
     // EmulatorJS requires window, so guard SSR
     if (typeof window === "undefined") return;
 
+    // Watch for EmulatorJS touch/gamepad overlay elements and hide them
+    // so only our custom GameBoyShell controls are visible
+    const container = document.getElementById(containerId);
+    const observer = new MutationObserver(() => {
+      if (!container) return;
+      container.querySelectorAll<HTMLElement>("*").forEach((el) => {
+        const cls = (el.className || "").toString().toLowerCase();
+        const id  = (el.id || "").toLowerCase();
+        if (
+          cls.includes("gamepad") ||
+          cls.includes("mobile") ||
+          cls.includes("control") ||
+          cls.includes("button") ||
+          cls.includes("joystick") ||
+          cls.includes("dpad") ||
+          id.includes("gamepad") ||
+          id.includes("mobile") ||
+          id.includes("control")
+        ) {
+          el.style.setProperty("display", "none", "important");
+        }
+      });
+    });
+
+    if (container) {
+      observer.observe(container, { childList: true, subtree: true });
+    }
+
     const cleanup = initEmulatorJS({
       containerId,
       romPath,
@@ -49,6 +77,7 @@ export default function EmulatorCanvas({
     cleanupRef.current = cleanup;
 
     return () => {
+      observer.disconnect();
       cleanupRef.current?.();
       cleanupRef.current = null;
     };
