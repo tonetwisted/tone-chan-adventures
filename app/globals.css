@@ -107,6 +107,15 @@ body {
   object-fit: contain;
 }
 
+/* Hide EmulatorJS built-in mobile touch controls & bottom toolbar */
+.ejs-mobile-controls,
+.ejs-controls-overlay,
+[class*="mobile-controls"],
+[class*="touch-controls"],
+.ejs-bottom-bar {
+  display: none !important;
+}
+
 /* ── Focus styles ─────────────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--tc-cyan);

@@ -64,6 +64,7 @@ export function initEmulatorJS(opts: EmulatorJSOptions): () => void {
   w.EJS_pathtodata      = "https://cdn.emulatorjs.org/stable/data/";
   w.EJS_startOnLoaded   = true;
   w.EJS_volume          = cfg.volume;
+  w.EJS_mobileControls  = false;   // disable built-in touch overlay; we use our own shell
   w.EJS_defaultOptions  = {
     "save-state-location": "keep in browser",
   };
