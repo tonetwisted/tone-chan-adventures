@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import GameBoyShell from "./GameBoyShell";
@@ -51,6 +51,8 @@ export default function EmulatorContainer() {
   const [isMobile, setIsMobile] = useState(false);
   const [isError, setIsError] = useState(false);
   const [pressed, setPressed] = useState<Set<string>>(new Set());
+  // Tracks whether we've already dismissed the EmulatorJS "click to resume" overlay
+  const audioUnlocked = useRef(false);
 
   useEffect(() => { setIsMobile(isMobileDevice()); }, []);
 
@@ -59,14 +61,25 @@ export default function EmulatorContainer() {
     const idx = BTN_TO_INDEX[btn];
     const type = down ? "keydown" : "keyup";
 
-    // Method 1: simulateInput API (works when emulator core is running)
+    // On first press: click the canvas SYNCHRONOUSLY within this trusted pointer
+    // event callback — browser user-activation is still live, so AudioContext
+    // unlocks and EmulatorJS dismisses its "click to resume" overlay.
+    if (down && !audioUnlocked.current) {
+      const canvas = document.querySelector("#ejs-player canvas") as HTMLElement | null;
+      if (canvas) {
+        audioUnlocked.current = true;
+        canvas.click();
+      }
+    }
+
+    // Method 1: simulateInput API (works once emulator core is running)
     const w = window as unknown as Record<string, unknown>;
     const gm = (w.EJS_emulator as { gameManager?: { simulateInput?: (p: number, b: number, v: number) => void } } | undefined)?.gameManager;
     if (idx !== undefined && gm?.simulateInput) {
       gm.simulateInput(0, idx, val);
     }
 
-    // Method 2: keyboard event fallback — same as standalone index.html
+    // Method 2: keyboard event fallback — dispatched to document + any iframes
     const key = BTN_TO_KEY[btn];
     if (key) {
       const opts = { key, bubbles: true, cancelable: true };
@@ -96,6 +109,11 @@ export default function EmulatorContainer() {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
       const btn = KEY_TO_BTN[e.key];
       if (!btn || e.repeat) return;
+      // Keyboard press is also a trusted event — unlock on first key too
+      if (!audioUnlocked.current) {
+        const canvas = document.querySelector("#ejs-player canvas") as HTMLElement | null;
+        if (canvas) { audioUnlocked.current = true; canvas.click(); }
+      }
       fireButton(btn, true);
       setPressed((prev) => new Set(prev).add(btn));
     };

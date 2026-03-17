@@ -320,25 +320,36 @@
     document.querySelectorAll("[data-key]").forEach(wireButton);
   </script>
 
-  <!-- ── Tap-to-play: dismiss overlay and unlock audio on first interaction ── -->
+  <!-- ── Unlock audio on first interaction: click the canvas (not just container) ── -->
   <script>
-    var overlayDismissed = false;
-    function dismissOverlay() {
-      if (overlayDismissed) return;
-      overlayDismissed = true;
+    var audioUnlocked = false;
+
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      // Click the canvas directly — event bubbles up to EmulatorJS listener.
+      // Must run synchronously within a trusted event to keep user-activation live.
+      var canvas = document.querySelector("#game canvas");
+      if (canvas) {
+        audioUnlocked = true;
+        canvas.click();
+      } else {
+        // Canvas not ready yet — fall back to container click
+        var game = document.getElementById("game");
+        if (game) game.click();
+      }
+      // Hide tap overlay
       var overlay = document.getElementById("tap-overlay");
       if (overlay) overlay.style.display = "none";
-      // Click the game container within this trusted event callback to unlock audio
-      document.getElementById("game").click();
     }
 
-    document.getElementById("tap-overlay").addEventListener("click", dismissOverlay);
-    document.getElementById("tap-overlay").addEventListener("touchstart", dismissOverlay, { passive: true });
+    // Tap overlay click
+    document.getElementById("tap-overlay").addEventListener("click", unlockAudio);
+    document.getElementById("tap-overlay").addEventListener("touchstart", unlockAudio, { passive: true });
 
-    // Also dismiss on first button press (button presses are trusted events)
+    // Any button press also unlocks
     document.querySelectorAll("[data-key]").forEach(function(el) {
-      el.addEventListener("touchstart", dismissOverlay, { passive: true });
-      el.addEventListener("mousedown", dismissOverlay);
+      el.addEventListener("touchstart", unlockAudio, { passive: true });
+      el.addEventListener("mousedown",  unlockAudio);
     });
   </script>
 
