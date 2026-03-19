@@ -149,10 +149,54 @@ body {
   border-radius: 4px;
 }
 
+/* ── Glitch animation ─────────────────────────────────────────────────────── */
+@keyframes glitch {
+  0%, 90%, 100% {
+    text-shadow:
+      0 0 20px hsl(326, 100%, 74%),
+      0 0 40px hsl(271, 81%, 56%),
+      3px 3px 0px hsl(200, 98%, 60%);
+    transform: none;
+  }
+  93% {
+    text-shadow: -4px 0 hsl(200, 98%, 60%), 4px 0 hsl(326, 100%, 74%);
+    transform: skewX(-3deg) translateX(2px);
+  }
+  96% {
+    text-shadow: 4px 0 hsl(200, 98%, 60%), -4px 0 hsl(326, 100%, 74%);
+    transform: skewX(3deg) translateX(-2px);
+  }
+  98% {
+    text-shadow:
+      0 0 20px hsl(326, 100%, 74%),
+      0 0 40px hsl(271, 81%, 56%),
+      3px 3px 0px hsl(200, 98%, 60%);
+    transform: none;
+  }
+}
+
+.glitch-title {
+  animation: glitch 5s infinite;
+}
+
+/* ── Neon pulse ───────────────────────────────────────────────────────────── */
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+.neon-pulse {
+  animation: neon-pulse 2.5s ease-in-out infinite;
+}
+
 /* ── Social icon hover ────────────────────────────────────────────────────── */
 .social-icon:hover {
-  box-shadow: 0 0 16px hsla(330, 81%, 60%, 0.4);
-  border-color: hsl(330, 81%, 60%) !important;
+  box-shadow: 0 0 20px hsla(271, 81%, 56%, 0.5), 0 0 40px hsla(330, 81%, 60%, 0.2) !important;
+  border-color: hsl(271, 81%, 56%) !important;
+}
+
+.social-icon:hover svg {
+  fill: hsl(326, 100%, 74%);
 }
 
 /* ── Safe area bottom padding (iPhone notch / home indicator) ────────────── */
