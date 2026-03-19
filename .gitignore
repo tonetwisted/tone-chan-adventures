@@ -39,3 +39,12 @@ next-env.d.ts
 
 # EmulatorJS (self-hosted, too large for git)
 /public/emulatorjs/
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
